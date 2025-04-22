@@ -5,4 +5,5 @@ export interface TaskRepositoryInterface {
   listAllTasks(limit: number, offset: number): Promise<Task[]>
   listAllTasksByUser(user: User, limit: number, offset: number): Promise<Task[]>
   persist(entity: Task): Promise<Task>
+  findById(id: string): Promise<Task>
 }

@@ -1,9 +1,5 @@
 import {
-  Controller,
-  Get,
-  HttpCode,
-  Post,
-  UseGuards,
+  Controller, Get, HttpCode, Patch, Post, UseGuards,
 } from '@nestjs/common';
 import { StatusCodes } from 'http-status-codes';
 import { RoleGuard } from '../../users/utils/role.guard';
@@ -30,6 +26,14 @@ export class TaskController {
   @HttpCode(StatusCodes.CREATED)
   public async executeCreateTask(@CreateTask() request: CreateTaskRequest): Promise<TaskResponse> {
     return this.service.createTask(request);
+  }
+
+  @Patch('tasks/:taskId')
+  @UseGuards(ApiKeyGuard, RoleGuard)
+  @Roles(Role.Manager, Role.Technician)
+  @HttpCode(StatusCodes.ACCEPTED)
+  public async executedescriptionChange(@CreateTask() request: CreateTaskRequest, taskId: string): Promise<TaskResponse> {
+    return this.service.descriptionChange(request, taskId);
   }
 
   @Get()
