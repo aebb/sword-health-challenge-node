@@ -12,8 +12,8 @@ import { CreateTaskRequest } from '../dto/request/create/create-task.request';
 import { ListTaskRequest } from '../dto/request/list/list-task.request';
 import { ListTask } from '../dto/request/list/list-task.decorator';
 import { TaskResponse } from '../dto/response/task.response';
-import {UpdateTask} from "../dto/request/update/update-task.decorator";
-import {UpdateTaskRequest} from "../dto/request/update/update-task.requests";
+import { UpdateTask } from '../dto/request/update/update-task.decorator';
+import { UpdateTaskRequest } from '../dto/request/update/update-task.requests';
 
 @Controller('task')
 export class TaskController {

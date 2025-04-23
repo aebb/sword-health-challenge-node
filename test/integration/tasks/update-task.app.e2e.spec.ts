@@ -66,7 +66,7 @@ describe('TaskController (e2e) [PATCH] /task/:id', () => {
 
         await request(app.getHttpServer())
             .patch(`/task/${task.getIdentifier()}`)
-            .send({summary: 123 })
+            .send({summary: 123})
             .set({Authorization: 'apiKey'})
             .expect(400)
 
@@ -85,9 +85,77 @@ describe('TaskController (e2e) [PATCH] /task/:id', () => {
 
         await request(app.getHttpServer())
             .patch(`/task/${task.getIdentifier()}`)
-            .send({summary: '' })
+            .send({summary: ''})
             .set({Authorization: 'apiKey'})
             .expect(400)
+    })
+
+    it('Should fail - task not found', async function () {
+        const user = new User(
+            'foo', [Role.Manager], 'bar', 'apiKey', Promise.resolve([])
+        );
+        await moduleRef.get<UserRepositoryORM>(UserRepositoryORM).persist(user);
+
+        await request(app.getHttpServer())
+            .patch(`/task/1`)
+            .send({
+                summary: 'this is a demo task',
+                id: '1'
+            })
+            .set({Authorization: 'apiKey'})
+            .expect(404)
+
+    })
+
+    it('Should fail - invalid id', async function () {
+        const user = new User(
+            'foo', [Role.Manager], 'bar', 'apiKey', Promise.resolve([])
+        );
+        await moduleRef.get<UserRepositoryORM>(UserRepositoryORM).persist(user);
+
+        await request(app.getHttpServer())
+            .patch(`/task/xpto`)
+            .send({
+                summary: 'this is a demo task',
+                id: 'xpto'
+            })
+            .set({Authorization: 'apiKey'})
+            .expect(400)
+            .then((response) => {
+                expect(response.body.message).toStrictEqual(
+                    [
+                        'id must be a number string'
+                    ]
+                )
+            });
+
+    })
+
+    it('Should fail - not a manager', async function () {
+        const user = new User(
+            'foo', [Role.Technician], 'bar', 'apiKey', Promise.resolve([])
+        );
+        await moduleRef.get<UserRepositoryORM>(UserRepositoryORM).persist(user);
+
+        const user1 = new User(
+            'foo1', [Role.Technician], 'bar', 'apiKey1', Promise.resolve([])
+        );
+        await moduleRef.get<UserRepositoryORM>(UserRepositoryORM).persist(user1);
+
+        const task = new Task(
+            'demo summary', user
+        );
+        await moduleRef.get<TaskRepositoryORM>(TaskRepositoryORM).persist(task);
+
+        await request(app.getHttpServer())
+            .patch(`/task/${task.getIdentifier()}`)
+            .send({
+                summary: 'this is a demo task',
+                id: task.getIdentifier()
+            })
+            .set({Authorization: 'apiKey1'})
+            .expect(401)
+
     })
 
     it('Success - update a new task',
