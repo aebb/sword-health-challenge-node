@@ -50,4 +50,8 @@ export class Task {
   public getUpdatedAt(): Date {
     return this.updatedAt;
   }
+
+  public setSummary(summary: string) {
+    this.summary = summary;
+  }
 }
