@@ -23,7 +23,7 @@ export class UserController {
     return this.service.createUser(request);
   }
 
-  @Patch()
+  @Patch('/password')
   @UseGuards(ApiKeyGuard, RoleGuard)
   @Roles(Role.Technician, Role.Manager)
   @HttpCode(StatusCodes.OK)

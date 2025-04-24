@@ -30,10 +30,6 @@ export class UserService {
   public async updatePassword(request: UpdateUserPassInterface): Promise<UserResponse> {
     const user = await this.userRepository.findOneByApiKey(request.getUser().getIdentifier());
 
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
     user.setPassword(request.getPassword());
 
     await this.userRepository.persist(user);
