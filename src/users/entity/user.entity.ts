@@ -55,4 +55,8 @@ export class User {
   public isManager(): boolean {
     return this.roles.includes(Role.Manager);
   }
+
+  public setPassword(pass: string) {
+    this.password = pass;
+  }
 }

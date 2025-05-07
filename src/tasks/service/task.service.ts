@@ -1,5 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException, HttpStatus, Inject, Injectable, NotFoundException, UnauthorizedException,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { AuthGuard } from '@nestjs/passport';
 import { Services } from '../../services.enum';
 import { TaskRepositoryInterface } from '../repository/task.repository.interface';
 import { CreateTaskInterface } from '../dto/request/create/create-task.interface';
@@ -10,6 +13,10 @@ import {
   CreateTaskNotification,
 } from '../../notification/dto/request/create-task.notification';
 import { TaskResponse } from '../dto/response/task.response';
+import { Role } from '../../users/entity/role.enum';
+import { AuthenticatedRequest } from '../../users/dto/request/auth/authenticated.request';
+import { UpdateTaskInterface } from '../dto/request/update/update-task.interface';
+import { DatabaseSource } from '../../../data-source';
 
 @Injectable()
 export class TaskService {
@@ -22,7 +29,8 @@ export class TaskService {
     private readonly messageBus: ClientProxy,
     @Inject(Services.ListingLimit)
     private readonly listingLimit: number,
-  ) {}
+  ) {
+  }
 
   public async createTask(request: CreateTaskInterface): Promise<TaskResponse> {
     const task = new Task(
@@ -50,5 +58,23 @@ export class TaskService {
       : await this.taskRepository.listAllTasksByUser(user, limit, offset);
 
     return result.map((task) => new TaskResponse(task));
+  }
+
+  public async updateDescription(request: UpdateTaskInterface): Promise<TaskResponse> {
+    const task = await this.taskRepository.findById(request.getId());
+
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+
+    const user = request.getUser();
+    if (user.getIdentifier() !== task.getUser().getIdentifier() && !user.isManager()) {
+      throw new UnauthorizedException('User not accepted');
+    }
+
+    task.setSummary(request.getSummary());
+    await this.taskRepository.persist(task);
+
+    return new TaskResponse(task);
   }
 }

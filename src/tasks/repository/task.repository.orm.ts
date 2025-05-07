@@ -9,7 +9,8 @@ import { User } from '../../users/entity/user.entity';
 export class TaskRepositoryORM implements TaskRepositoryInterface {
   public constructor(
     @InjectRepository(Task) private readonly entityManager: Repository<Task>,
-  ) {}
+  ) {
+  }
 
   public async persist(entity: Task): Promise<Task> {
     return this.entityManager.save(entity);
@@ -31,5 +32,12 @@ export class TaskRepositoryORM implements TaskRepositoryInterface {
       .limit(limit)
       .offset(offset)
       .getMany();
+  }
+
+  public async findById(id: string | number): Promise<Task> {
+    return this.entityManager.findOne({
+      where: { id: +id },
+      relations: ['user'],
+    });
   }
 }
